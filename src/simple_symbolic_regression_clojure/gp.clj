@@ -68,7 +68,9 @@
   (assoc individual :score score))
 
 (defn get-score [individual]
-  (:score individual))
+  (when-not (deref (:score individual))
+    (await (:score individual)))
+  (deref (:score individual)))
 
 
 ;;; Generating random scripts, individuals, etc.
@@ -99,9 +101,8 @@
 (defn score-using-rubrics
   "assigns the score value of an Individual by invoking `total-score-on` a set of Rubrics"
   [individual rubrics]
-  (let [my-atom (atom nil)
-        my-agent (agent 0)]
-  (set-score individual @(send my-agent total-score-on (:script individual) rubrics))))
+  (let [my-agent (agent nil)]
+  (set-score individual (send my-agent total-score-on (:script individual) rubrics))))
 
 
 (defn score-population
